@@ -12,7 +12,7 @@ export const sendCookie = (userRef, res, message, statusCode = 200) => {
     .status(statusCode)
     .cookie("token", token, {
       httpOnly: true,
-      maxAge: 330 * 60 * 1000 + 1000 * 60 * 5, //Added 5:30 hrs to get time in IST
+      maxAge: 330 * 60 * 1000 + 1000 * 60 * 15, //Added 5:30 hrs to get time in IST
     })
     .json({
       success: true,
