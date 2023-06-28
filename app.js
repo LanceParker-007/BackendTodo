@@ -4,6 +4,7 @@ import userRouter from "./routes/user.js";
 import taskRouter from "./routes/task.js";
 import { config } from "dotenv";
 import cookieParser from "cookie-parser";
+import { errorMiddleware } from "./middlewares/error.js";
 
 //Creating app
 const app = express();
@@ -29,6 +30,9 @@ app.use("/api/v1/task", taskRouter);
 app.get("/", async (req, res) => {
   return res.send("Hello Route Splitting and MVC");
 });
+
+//Using Error Middleware
+app.use(errorMiddleware);
 
 //Creating REST APIs
 

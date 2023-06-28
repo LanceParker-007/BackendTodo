@@ -1,4 +1,5 @@
 import Task from "../models/task.js";
+import ErrorHandler from "../middlewares/error.js";
 import admin from "../databaseConnection/firebaseConfig.js";
 const db = admin.firestore();
 const taskCollectionRef = db.collection("Tasks");
@@ -53,12 +54,7 @@ export const updateTask = async (req, res, next) => {
   try {
     const { id } = req.params;
     const task = await taskCollectionRef.doc(id).get();
-    if (!task.exists) {
-      return res.status(404).json({
-        success: false,
-        message: "Task not found",
-      });
-    }
+    if (!task.exists) return next(new ErrorHandler("Task not found", 404));
 
     await taskCollectionRef.doc(id).update({
       isCompleted: !task.data().isCompleted,
@@ -80,12 +76,7 @@ export const deleteTask = async (req, res, next) => {
 
     const task = await taskCollectionRef.doc(id).delete();
 
-    if (!task.exists) {
-      return res.status(404).json({
-        success: false,
-        message: "Task not found",
-      });
-    }
+    if (!task.exists) return next(new ErrorHandler("Task not found", 404));
 
     return res.status(200).json({
       success: true,

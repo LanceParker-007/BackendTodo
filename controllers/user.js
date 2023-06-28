@@ -4,10 +4,11 @@ const userCollectionRef = db.collection("Users");
 import bcrypt from "bcrypt";
 import { sendCookie } from "../utils/features.js";
 import User from "../models/user.js";
+import ErrorHandler from "../middlewares/error.js";
 // import jwt from "jsonwebtoken";
 
 //All functions
-export const getAllUsers = async (req, res) => {};
+// export const getAllUsers = async (req, res) => {};
 
 export const login = async (req, res, next) => {
   const { email, password } = req.body;
@@ -18,15 +19,10 @@ export const login = async (req, res, next) => {
     });
   }
 
-  let userRef = await userCollectionRef.where("email", "==", email).get();
-
   try {
+    let userRef = await userCollectionRef.where("email", "==", email).get();
     if (userRef.empty) {
-      console.log("Invalid email.");
-      return res.status(404).json({
-        success: false,
-        message: "Invalid email.",
-      });
+      return next(new ErrorHandler("Invalid email", 400));
     } else {
       //   console.log(password); //recieved password from frontend
       //   console.log(userRef.docs[0].data().password); //recieved password from Records
@@ -35,20 +31,16 @@ export const login = async (req, res, next) => {
       if (isMatch) {
         sendCookie(user, res, `Welcome back ${user.data().name}`, 201);
       } else {
-        console.log("Invalid password");
-        return res.status(404).json({
-          success: false,
-          message: "Invalid password",
-        });
+        return next(new ErrorHandler("Invalid password", 400));
       }
     }
   } catch (err) {
-    console.log("Some error occured while logging in the user.", err);
-    return res.status(404).json({
-      success: false,
-      message: "Some error occured while loggin in the user.",
-      Error: err,
-    });
+    return next(
+      new ErrorHandler(
+        `Some error occured while logging in the user: ${err}`,
+        404
+      )
+    );
   }
 };
 
@@ -66,11 +58,7 @@ export const register = async (req, res) => {
     let userRef = await userCollectionRef.where("email", "==", email).get();
 
     if (userRef.size > 0) {
-      console.log("User already regitered!");
-      return res.status(404).json({
-        success: false,
-        message: "User already exists",
-      });
+      return next(new ErrorHandler("User already exists", 400));
     } else {
       const hashedPassword = await bcrypt.hash(password, 10);
       const newUser = new User(name, email, hashedPassword);
@@ -78,12 +66,10 @@ export const register = async (req, res) => {
       sendCookie(userRef, res, "Registered Successfully.", 201);
     }
   } catch (err) {
-    console.log("Some error occured while registering the user.", err);
-    return res.status(404).json({
-      success: false,
-      message: "Some error occured while registering the user.",
-      Error: err,
-    });
+    new ErrorHandler(
+      `Some error occured while registering in the user: ${err}`,
+      404
+    );
   }
 };
 
