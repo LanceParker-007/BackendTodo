@@ -1,11 +1,13 @@
-import admin from 'firebase-admin';
-import fs from 'fs';
+import admin from "firebase-admin";
+import fs from "fs";
 
-const serviceAccount = JSON.parse(fs.readFileSync('databaseConnection/serviceAccountKey.json'));
+const serviceAccount = JSON.parse(
+  fs.readFileSync("databaseConnection/serviceAccountKey.json")
+);
 
 admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    // Add other Firebase configuration options if needed
+  credential: admin.credential.cert(serviceAccount),
+  // Add other Firebase configuration options if needed
 });
 
 // Export the initialized Firebase Admin SDK instance

@@ -4,7 +4,7 @@ const userCollectionRef = db.collection("Users");
 import bcrypt from "bcrypt";
 import { sendCookie } from "../utils/features.js";
 import User from "../models/user.js";
-import jwt from "jsonwebtoken";
+// import jwt from "jsonwebtoken";
 
 //All functions
 export const getAllUsers = async (req, res) => {};
@@ -87,26 +87,37 @@ export const register = async (req, res) => {
   }
 };
 
-export const getMyProfile = async (req, res) => {
-  const { token } = req.cookies;
-  if (!token) {
-    return res.status(404).json({
-      success: false,
-      message: "Not logged in. Login first",
-    });
-  }
+export const getMyProfile = (req, res) => {
+  //Have to do this work again again in the future for every protected route so we will create a middleware isAuthenticated
+  //   const { token } = req.cookies;
+  //   if (!token) {
+  //     return res.status(404).json({
+  //       success: false,
+  //       message: "Not logged in. Login first",
+  //     });
+  //   }
+  //   try {
+  //     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  //     const id = decoded._id;
+  //     const user = userCollectionRef.doc(id).get();
+  //     return res.status(200).json({ success: true, user });
+  //   } catch (err) {
+  //     console.error("Error decoding token:", err);
+  //     res.status(404).json({
+  //       success: false,
+  //       error: err,
+  //     });
+  //   }
 
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  //   All of the above code replaced by single line
+  return res.status(200).json({ success: true, user: req.user });
+};
 
-    const id = decoded._id;
-    const user = await userCollectionRef.doc(id).get();
-    return res.status(200).json({ success: true, user });
-  } catch (err) {
-    console.error("Error decoding token:", err);
-    res.status(404).json({
-      success: false,
-      error: err,
-    });
-  }
+export const logout = (req, res) => {
+  res
+    .status(200)
+    .cookie("token", "", {
+      expires: new Date(Date.now()),
+    })
+    .json({ success: true, user: req.user });
 };
