@@ -13,6 +13,8 @@ export const sendCookie = (userRef, res, message, statusCode = 200) => {
     .cookie("token", token, {
       httpOnly: true,
       maxAge: 330 * 60 * 1000 + 1000 * 60 * 15, //Added 5:30 hrs to get time in IST
+      sameSite: process.env.NODE_ENV === "Development" ? "Lax" : "None",
+      secure: process.env.NODE_ENV === "Development" ? false : true,
     })
     .json({
       success: true,

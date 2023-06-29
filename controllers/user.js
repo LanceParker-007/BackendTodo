@@ -104,6 +104,9 @@ export const logout = (req, res) => {
     .status(200)
     .cookie("token", "", {
       expires: new Date(Date.now()),
+      maxAge: 330 * 60 * 1000 + 1000 * 60 * 15, //Added 5:30 hrs to get time in IST
+      sameSite: process.env.NODE_ENV === "Development" ? "lax" : "none",
+      secure: process.env.NODE_ENV === "Development" ? false : true,
     })
     .json({ success: true, user: req.user });
 };
