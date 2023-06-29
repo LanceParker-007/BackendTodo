@@ -24,7 +24,7 @@ export const newTask = async (req, res, next) => {
       message: "Task added successfully",
     });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     return res.status(404).json({
       success: false,
       message: "Some error occured while adding the task!",
@@ -37,7 +37,7 @@ export const getMyTasks = async (req, res, next) => {
   const user = req.user;
   const allTasks = await taskCollectionRef.where("userId", "==", user.id).get();
   if (allTasks.empty) {
-    console.log("Empty");
+    // console.log("Empty");
   }
 
   const tasks = allTasks.docs.map((task) => {
@@ -65,7 +65,7 @@ export const updateTask = async (req, res, next) => {
       message: "Task updated successfully",
     });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     return res.status(404).json({ success: false, error: error });
   }
 };
