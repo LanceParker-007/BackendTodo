@@ -1,21 +1,20 @@
 import express from "express";
 // import admin from "./firebaseConfig.js";
+import { config } from "dotenv";
 import userRouter from "./routes/user.js";
 import taskRouter from "./routes/task.js";
-import { config } from "dotenv";
 import cookieParser from "cookie-parser";
 import { errorMiddleware } from "./middlewares/error.js";
 import cors from "cors";
 
 //Creating app
 const app = express();
-export default app;
 
 //connecting db
 
 //Config ENV file path
 config({
-  path: "./databaseConnection/config.env",
+  path: "./config.env",
 });
 
 //Middleware
@@ -45,3 +44,4 @@ app.use(errorMiddleware);
 //Creating REST APIs
 
 //App is listening here
+export default app;
