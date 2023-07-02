@@ -22,7 +22,10 @@ export const login = async (req, res, next) => {
   try {
     let userRef = await userCollectionRef.where("email", "==", email).get();
     if (userRef.empty) {
-      return next(new ErrorHandler("Invalid email", 400));
+      return res.status(400).json({
+        success: false,
+        message: "Invalid Email",
+      });
     } else {
       //   console.log(password); //recieved password from frontend
       //   console.log(userRef.docs[0].data().password); //recieved password from Records
@@ -31,16 +34,17 @@ export const login = async (req, res, next) => {
       if (isMatch) {
         sendCookie(user, res, `Welcome back ${user.data().name}`, 201);
       } else {
-        return next(new ErrorHandler("Invalid password", 400));
+        return res.status(400).json({
+          success: false,
+          message: "Invalid Password",
+        });
       }
     }
   } catch (err) {
-    return next(
-      new ErrorHandler(
-        `Some error occured while logging in the user: ${err}`,
-        404
-      )
-    );
+    return res.status(400).json({
+      success: false,
+      error: err,
+    });
   }
 };
 
@@ -58,7 +62,11 @@ export const register = async (req, res) => {
     let userRef = await userCollectionRef.where("email", "==", email).get();
 
     if (userRef.size > 0) {
-      return next(new ErrorHandler("User already exists", 400));
+      // return next(new ErrorHandler("User already exists", 400));
+      return res.status(400).json({
+        success: false,
+        message: "User already exists",
+      });
     } else {
       const hashedPassword = await bcrypt.hash(password, 10);
       const newUser = new User(name, email, hashedPassword);
@@ -66,10 +74,10 @@ export const register = async (req, res) => {
       sendCookie(userRef, res, "Registered Successfully.", 201);
     }
   } catch (err) {
-    new ErrorHandler(
-      `Some error occured while registering in the user: ${err}`,
-      404
-    );
+    return res.status(400).json({
+      success: false,
+      error: err,
+    });
   }
 };
 
