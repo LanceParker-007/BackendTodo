@@ -11,62 +11,58 @@ import ErrorHandler from "../middlewares/error.js";
 // export const getAllUsers = async (req, res) => {};
 
 export const login = async (req, res, next) => {
-  const { email, password } = req.body;
-  if (!email || !password) {
-    return res.json({
-      success: false,
-      message: "The fields are empty.",
-    });
-  }
-
   try {
-    let userRef = await userCollectionRef.where("email", "==", email).get();
-    if (userRef.empty) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid Email",
-      });
-    } else {
-      //   console.log(password); //recieved password from frontend
-      //   console.log(userRef.docs[0].data().password); //recieved password from Records
-      const user = userRef.docs[0];
-      const isMatch = await bcrypt.compare(password, user.data().password);
-      if (isMatch) {
-        sendCookie(user, res, `Welcome back ${user.data().name}`, 201);
-      } else {
-        return res.status(400).json({
-          success: false,
-          message: "Invalid Password",
-        });
-      }
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return next(new ErrorHandler("Fields are empty", 400));
     }
+
+    const userRef = await userCollectionRef.where("email", "==", email).get();
+    if (userRef.empty) {
+      return next(new ErrorHandler("Invalid email", 400));
+      // return res.status(404).json({
+      //   success: false,
+      //   message: "Invalid email. Please try again.",
+      // });
+    }
+
+    const user = userRef.docs[0];
+    const isMatch = await bcrypt.compare(password, user.data().password);
+    if (!isMatch) {
+      return next(new ErrorHandler("Invalid password", 400));
+      // return res.status(404).json({
+      //   success: false,
+      //   message: "Invalid password. Please try again.",
+      // });
+    }
+
+    sendCookie(user, res, `Welcome back ${user.data().name}`, 201);
   } catch (err) {
-    return res.status(400).json({
-      success: false,
-      error: err,
-    });
+    next(err); // Pass the error to the error handling middleware
   }
 };
 
-export const register = async (req, res) => {
+export const register = async (req, res, next) => {
   const { name, email, password } = req.body;
 
   if (!name || !email || !password) {
-    return res.json({
-      success: false,
-      message: "The fields are empty.",
-    });
+    return next(new ErrorHandler("The fields are empty", 400));
+    // return res.json({
+    //   success: false,
+    //   message: "The fields are empty.",
+    // });
   }
 
   try {
     let userRef = await userCollectionRef.where("email", "==", email).get();
 
     if (userRef.size > 0) {
-      // return next(new ErrorHandler("User already exists", 400));
-      return res.status(400).json({
-        success: false,
-        message: "User already exists",
-      });
+      return next(new ErrorHandler("User already exists", 409));
+      // return res.status(400).json({
+      //   success: false,
+      //   message: "User already exists",
+      // });
     } else {
       const hashedPassword = await bcrypt.hash(password, 10);
       const newUser = new User(name, email, hashedPassword);
@@ -74,10 +70,11 @@ export const register = async (req, res) => {
       sendCookie(userRef, res, "Registered Successfully.", 201);
     }
   } catch (err) {
-    return res.status(400).json({
-      success: false,
-      error: err,
-    });
+    return next(new ErrorHandler("Some error occured.", 400));
+    // return res.status(400).json({
+    //   success: false,
+    //   error: err,
+    // });
   }
 };
 
@@ -108,13 +105,12 @@ export const getMyProfile = (req, res) => {
 };
 
 export const logout = (req, res) => {
-  res
+  return res
     .status(200)
     .cookie("token", "", {
       expires: new Date(Date.now()),
-      maxAge: 330 * 60 * 1000 + 1000 * 60 * 15, //Added 5:30 hrs to get time in IST
       sameSite: process.env.NODE_ENV === "Development" ? "lax" : "none",
       secure: process.env.NODE_ENV === "Development" ? false : true,
     })
-    .json({ success: true, user: req.user });
+    .json({ success: true, user: req.user, message: "Logout successful!" });
 };

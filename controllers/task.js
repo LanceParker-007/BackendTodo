@@ -16,15 +16,16 @@ export const newTask = async (req, res, next) => {
 
   try {
     const newTask = new Task(title, description, false);
+    // console.log(req.user);
     await taskCollectionRef.add({ userId: req.user.id, ...newTask });
     // await taskCollectionRef.add({ user: req.user.data(), ...newTask });
-
+    // console.log("Task added");
     return res.status(201).json({
       success: true,
       message: "Task added successfully",
     });
   } catch (error) {
-    // console.log(error);
+    console.log(error);
     return res.status(404).json({
       success: false,
       message: "Some error occured while adding the task!",
@@ -40,8 +41,12 @@ export const getMyTasks = async (req, res, next) => {
     // console.log("Empty");
   }
 
-  const tasks = allTasks.docs.map((task) => {
-    return task.data();
+  const tasks = allTasks.docs.map((curTask) => {
+    let task = {
+      id: curTask.id,
+      ...curTask.data(),
+    };
+    return task;
   });
 
   return res.status(200).json({
@@ -53,11 +58,11 @@ export const getMyTasks = async (req, res, next) => {
 export const updateTask = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const task = await taskCollectionRef.doc(id).get();
-    if (!task.exists) return next(new ErrorHandler("Task not found", 404));
+    const taskRef = await taskCollectionRef.doc(id).get();
+    if (!taskRef.exists) return next(new ErrorHandler("Task not found", 404));
 
     await taskCollectionRef.doc(id).update({
-      isCompleted: !task.data().isCompleted,
+      isCompleted: !taskRef.data().isCompleted,
     });
 
     return res.status(200).json({
@@ -73,10 +78,10 @@ export const updateTask = async (req, res, next) => {
 export const deleteTask = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const taskRef = await taskCollectionRef.doc(id).get();
+    if (!taskRef.exists) return next(new ErrorHandler("Task not found", 404));
 
-    const task = await taskCollectionRef.doc(id).delete();
-
-    if (!task.exists) return next(new ErrorHandler("Task not found", 404));
+    await taskCollectionRef.doc(id).delete();
 
     return res.status(200).json({
       success: true,

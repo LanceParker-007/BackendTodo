@@ -8,17 +8,17 @@ export const isAuthenticated = async (req, res, next) => {
   if (!token) {
     return res.status(404).json({
       success: false,
-      message: "Not logged in. Login first",
+      message: "Login first",
     });
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const id = decoded._id;
-    req.user = await userCollectionRef.doc(id).get();
+    const userSnapshot = await userCollectionRef.doc(id).get();
+    req.user = { id, ...userSnapshot.data() };
     next();
   } catch (err) {
-    console.error("Error decoding token:", err);
     res.status(404).json({
       success: false,
       error: err,
