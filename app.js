@@ -22,7 +22,7 @@ app.use(express.json()); //Req.body
 app.use(cookieParser());
 app.use(
   cors({
-    origin: [process.env.FRONTEND_URL],
+    origin: [process.env.FRONTEND_URL, process.env.FRONTEND_URL_DEV],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
