@@ -1,2 +1,4 @@
 /node_modules
 /databaseConnection/config.env
+/databaseConnection/serviceAccountKey.json
+/serviceAccountKey.json
